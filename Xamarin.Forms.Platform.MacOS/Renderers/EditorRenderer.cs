@@ -54,13 +54,18 @@ namespace Xamarin.Forms.Platform.MacOS
 			else if (e.PropertyName == VisualElement.IsEnabledProperty.PropertyName)
 				UpdateEditable();
 			else if (e.PropertyName == Editor.TextColorProperty.PropertyName)
+			{
 				UpdateTextColor();
+				UpdateCharacterSpacing();
+			}
 			else if (e.PropertyName == Editor.FontAttributesProperty.PropertyName)
 				UpdateFont();
 			else if (e.PropertyName == Editor.FontFamilyProperty.PropertyName)
 				UpdateFont();
 			else if (e.PropertyName == Editor.FontSizeProperty.PropertyName)
 				UpdateFont();
+			else if (e.PropertyName == Editor.CharacterSpacingProperty.PropertyName)
+				UpdateCharacterSpacing();
 			else if (e.PropertyName == InputView.MaxLengthProperty.PropertyName)
 				UpdateMaxLength();
 			else if (e.PropertyName == Xamarin.Forms.InputView.IsReadOnlyProperty.PropertyName)
@@ -135,6 +140,11 @@ namespace Xamarin.Forms.Platform.MacOS
 		{
 			if (Control.StringValue != Element.Text)
 				Control.StringValue = Element.Text ?? string.Empty;
+		}
+
+		void UpdateCharacterSpacing()
+		{
+			Control.AttributedStringValue = Control.AttributedStringValue.AddCharacterSpacing(Element.Text, Element.CharacterSpacing);
 		}
 
 		void UpdateTextColor()
