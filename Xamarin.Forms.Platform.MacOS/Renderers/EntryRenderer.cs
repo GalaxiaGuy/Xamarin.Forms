@@ -117,7 +117,12 @@ namespace Xamarin.Forms.Platform.MacOS
 			else if (e.PropertyName == Entry.IsPasswordProperty.PropertyName)
 				UpdatePassword();
 			else if (e.PropertyName == Entry.TextProperty.PropertyName)
+			{
 				UpdateText();
+				UpdateCharacterSpacing();
+			}
+			else if (e.PropertyName == Entry.CharacterSpacingProperty.PropertyName)
+				UpdateCharacterSpacing();
 			else if (e.PropertyName == Entry.TextColorProperty.PropertyName)
 				UpdateColor();
 			else if (e.PropertyName == Entry.HorizontalTextAlignmentProperty.PropertyName)
@@ -204,6 +209,7 @@ namespace Xamarin.Forms.Platform.MacOS
 		{
 			UpdatePlaceholder();
 			UpdateText();
+			UpdateCharacterSpacing();
 			UpdateColor();
 			UpdateFont();
 			UpdateAlignment();
@@ -293,6 +299,8 @@ namespace Xamarin.Forms.Platform.MacOS
 			var color = Element.IsEnabled && !targetColor.IsDefault ? targetColor : ColorExtensions.SeventyPercentGrey.ToColor();
 
 			Control.PlaceholderAttributedString = formatted.ToAttributed(Element, color);
+			Control.PlaceholderAttributedString = Control.PlaceholderAttributedString.AddCharacterSpacing(Element.Placeholder, Element.CharacterSpacing);
+
 		}
 
 		protected override void SetAccessibilityLabel()
@@ -310,6 +318,12 @@ namespace Xamarin.Forms.Platform.MacOS
 			// ReSharper disable once RedundantCheckBeforeAssignment
 			if (Control.StringValue != Element.Text)
 				Control.StringValue = Element.Text ?? string.Empty;
+		}
+
+		void UpdateCharacterSpacing()
+		{
+			Control.AttributedStringValue = Control.AttributedStringValue.AddCharacterSpacing(Element.Text, Element.CharacterSpacing);
+			Control.PlaceholderAttributedString = Control.PlaceholderAttributedString.AddCharacterSpacing(Element.Placeholder, Element.CharacterSpacing);
 		}
 
 		void UpdateMaxLength()
