@@ -31,6 +31,7 @@ namespace Xamarin.Forms.Platform.MacOS
 				UpdatePicker();
 				UpdateFont();
 				UpdateTextColor();
+				UpdateCharacterSpacing();
 
 				((INotifyCollectionChanged)e.NewElement.Items).CollectionChanged -= RowsCollectionChanged;
 				((INotifyCollectionChanged)e.NewElement.Items).CollectionChanged += RowsCollectionChanged;
@@ -52,7 +53,12 @@ namespace Xamarin.Forms.Platform.MacOS
 		{
 			base.OnElementPropertyChanged(sender, e);
 			if (e.PropertyName == Picker.TitleProperty.PropertyName)
+			{
 				UpdatePicker();
+				UpdateCharacterSpacing();
+			}
+			if (e.PropertyName == Picker.CharacterSpacingProperty.PropertyName)
+				UpdateCharacterSpacing();
 			if (e.PropertyName == Picker.SelectedIndexProperty.PropertyName)
 				UpdatePicker();
 			if (e.PropertyName == Picker.TextColorProperty.PropertyName ||
@@ -148,9 +154,23 @@ namespace Xamarin.Forms.Platform.MacOS
 			var color = Element.TextColor;
 			if (color != Color.Default && Control.SelectedItem != null)
 			{
-				NSAttributedString textWithColor = new NSAttributedString(Control.SelectedItem.Title, foregroundColor: color.ToNSColor(), paragraphStyle: new NSMutableParagraphStyle() { Alignment = NSTextAlignment.Left });
-				Control.SelectedItem.AttributedTitle = textWithColor;
+				NSAttributedString attributedText = new NSAttributedString(Control.SelectedItem.Title, foregroundColor: color.ToNSColor(), paragraphStyle: new NSMutableParagraphStyle() { Alignment = NSTextAlignment.Left });
+				attributedText = Control.SelectedItem.AttributedTitle.AddCharacterSpacing(Control.SelectedItem.Title, Element.CharacterSpacing);
+				Control.SelectedItem.AttributedTitle = attributedText;
 			}
+		}
+
+		void UpdateCharacterSpacing()
+		{
+			if (Control == null || Element == null || Control.SelectedItem == null)
+				return;
+
+			foreach (NSMenuItem it in Control.Items())
+			{
+				it.AttributedTitle = it.AttributedTitle.AddCharacterSpacing(it.Title, Element.CharacterSpacing);
+			}
+
+			Control.SelectedItem.AttributedTitle = Control.SelectedItem.AttributedTitle.AddCharacterSpacing(Control.SelectedItem.Title, Element.CharacterSpacing);
 		}
 	}
 }
