@@ -46,6 +46,7 @@ namespace Xamarin.Forms.Platform.MacOS
 
 				UpdatePlaceholder();
 				UpdateText();
+				UpdateCharacterSpacing();
 				UpdateFont();
 				UpdateIsEnabled();
 				UpdateCancelButton();
@@ -72,7 +73,12 @@ namespace Xamarin.Forms.Platform.MacOS
 			else if (e.PropertyName == SearchBar.TextColorProperty.PropertyName)
 				UpdateTextColor();
 			else if (e.PropertyName == SearchBar.TextProperty.PropertyName)
+			{
 				UpdateText();
+				UpdateCharacterSpacing();
+			}
+			else if (e.PropertyName == SearchBar.CharacterSpacingProperty.PropertyName)
+				UpdateCharacterSpacing();
 			else if (e.PropertyName == SearchBar.CancelButtonColorProperty.PropertyName)
 				UpdateCancelButton();
 			else if (e.PropertyName == SearchBar.FontAttributesProperty.PropertyName)
@@ -162,6 +168,7 @@ namespace Xamarin.Forms.Platform.MacOS
 			var targetColor = Element.PlaceholderColor;
 			var color = Element.IsEnabled && !targetColor.IsDefault ? targetColor : ColorExtensions.SeventyPercentGrey.ToColor();
 			Control.PlaceholderAttributedString = formatted.ToAttributed(Element, color);
+			Control.PlaceholderAttributedString = Control.PlaceholderAttributedString.AddCharacterSpacing(Element.Placeholder, Element.CharacterSpacing);
 		}
 
 		void UpdateText()
@@ -176,6 +183,12 @@ namespace Xamarin.Forms.Platform.MacOS
 			var targetColor = Element.TextColor;
 
 			Control.TextColor = targetColor.ToNSColor(_defaultTextColor);
+		}
+
+		void UpdateCharacterSpacing()
+		{
+			Control.AttributedStringValue = Control.AttributedStringValue.AddCharacterSpacing(Element.Text, Element.CharacterSpacing);
+			Control.PlaceholderAttributedString = Control.PlaceholderAttributedString.AddCharacterSpacing(Element.Placeholder, Element.CharacterSpacing);
 		}
 	}
 }
