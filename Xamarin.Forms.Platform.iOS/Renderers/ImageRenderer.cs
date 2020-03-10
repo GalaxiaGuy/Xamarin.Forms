@@ -9,6 +9,8 @@ using UIKit;
 using Xamarin.Forms.Internals;
 using RectangleF = CoreGraphics.CGRect;
 using PreserveAttribute = Foundation.PreserveAttribute;
+using CoreGraphics;
+using System.Collections.Generic;
 
 namespace Xamarin.Forms.Platform.iOS
 {
@@ -253,35 +255,93 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 		}
 
+		private class LayerProperties
+		{
+			public UIFont Font { get; set; }
+			public Color IconColor { get; set; }
+			public NSAttributedString AttString { get; set; }
+			public CGSize ImageSize { get; set; }
+		}
+
 		public Task<UIImage> LoadImageAsync(
 			ImageSource imagesource,
 			CancellationToken cancelationToken = default(CancellationToken),
 			float scale = 1f)
 		{
 			UIImage image = null;
-			var fontsource = imagesource as FontImageSource;
-			if (fontsource != null)
+			var layerPropertiesList = new List<LayerProperties>();
+			CGSize maxImageSize = CGSize.Empty;
+			bool renderingModeAlwaysOriginal = false;
+
+			if (imagesource is LayeredFontImageSource layeredFontImageSource)
+			{
+				var baseFont = UIFont.FromName(layeredFontImageSource.FontFamily ?? string.Empty, (float)layeredFontImageSource.Size) ??
+					UIFont.SystemFontOfSize((float)layeredFontImageSource.Size);
+				var baseIconColor = layeredFontImageSource.Color.IsDefault ? _defaultColor : layeredFontImageSource.Color;
+				var baseAttString = layeredFontImageSource.Glyph == null ? null : new NSAttributedString(layeredFontImageSource.Glyph, font: baseFont, foregroundColor: baseIconColor.ToUIColor());
+				maxImageSize = layeredFontImageSource.Glyph == null ? CGSize.Empty : ((NSString)layeredFontImageSource.Glyph).GetSizeUsingAttributes(baseAttString.GetUIKitAttributes(0, out _));
+
+				foreach (var layer in layeredFontImageSource.Layers)
+				{
+					var font = layer.FontFamily == null ? baseFont : UIFont.FromName(layer.FontFamily ?? string.Empty, (float)layer.Size) ??
+						UIFont.SystemFontOfSize((float)layer.Size);
+					var iconcolor = layer.Color.IsDefault ? baseIconColor : layer.Color;
+					var attString = layer.Glyph == null ? baseAttString : new NSAttributedString(layer.Glyph, font: font, foregroundColor: iconcolor.ToUIColor());
+					var imagesize = ((NSString)layer.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
+
+					layerPropertiesList.Add(new LayerProperties { Font = font, IconColor = iconcolor, AttString = attString, ImageSize = imagesize });
+
+					if (imagesize.Width > maxImageSize.Width)
+					{
+						maxImageSize.Width = imagesize.Width;
+					}
+					if (imagesize.Height > maxImageSize.Height)
+					{
+						maxImageSize.Height = imagesize.Height;
+					}
+
+				}
+
+				renderingModeAlwaysOriginal = baseIconColor != _defaultColor;
+			}
+			else if (imagesource is FontImageSource fontsource)
 			{
 				var font = UIFont.FromName(fontsource.FontFamily ?? string.Empty, (float)fontsource.Size) ??
 					UIFont.SystemFontOfSize((float)fontsource.Size);
 				var iconcolor = fontsource.Color.IsDefault ? _defaultColor : fontsource.Color;
 				var attString = new NSAttributedString(fontsource.Glyph, font: font, foregroundColor: iconcolor.ToUIColor());
 				var imagesize = ((NSString)fontsource.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
-				
-				UIGraphics.BeginImageContextWithOptions(imagesize, false, 0f);
-				var ctx = new NSStringDrawingContext();
+
+				layerPropertiesList.Add(new LayerProperties { Font = font, IconColor = iconcolor, AttString = attString, ImageSize = imagesize });
+
+				maxImageSize = imagesize;
+			}
+
+			UIGraphics.BeginImageContextWithOptions(maxImageSize, false, 0f);
+			var ctx = new NSStringDrawingContext();
+
+			foreach (var layerProperties in layerPropertiesList)
+			{
+				var font = layerProperties.Font;
+				var iconcolor = layerProperties.IconColor;
+				var attString = layerProperties.AttString;
+				var imagesize = layerProperties.ImageSize;
+
 				var boundingRect = attString.GetBoundingRect(imagesize, (NSStringDrawingOptions)0, ctx);
 				attString.DrawString(new RectangleF(
-					imagesize.Width / 2 - boundingRect.Size.Width / 2,
-					imagesize.Height / 2 - boundingRect.Size.Height / 2,
-					imagesize.Width,
-					imagesize.Height));
-				image = UIGraphics.GetImageFromCurrentImageContext();
-				UIGraphics.EndImageContext();
+					maxImageSize.Width / 2 - boundingRect.Size.Width / 2,
+					maxImageSize.Height / 2 - boundingRect.Size.Height / 2,
+					maxImageSize.Width,
+					maxImageSize.Height));
 
-				if (iconcolor != _defaultColor)
-					image = image.ImageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal);
+				renderingModeAlwaysOriginal |= iconcolor != _defaultColor;
 			}
+			image = UIGraphics.GetImageFromCurrentImageContext();
+			UIGraphics.EndImageContext();
+
+			if (renderingModeAlwaysOriginal)
+				image = image.ImageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal);
+
 			return Task.FromResult(image);
 
 		}

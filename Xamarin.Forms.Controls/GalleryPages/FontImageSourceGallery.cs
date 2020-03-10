@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms.Controls.Issues;
+﻿using System.Collections.Generic;
+using Xamarin.Forms.Controls.Issues;
 
 namespace Xamarin.Forms.Controls
 {
@@ -62,6 +63,32 @@ namespace Xamarin.Forms.Controls
 				}, i % 10, i / 10);
 				i++;
 			}
+
+			grid.Children.Add(new Image
+			{
+				Source = new LayeredFontImageSource
+				{
+					Layers = new List<FontImageSource> {
+						new FontImageSource
+						{
+							Glyph = '\uf2d1'.ToString(),
+							FontFamily = fontFamily,
+							Size = 20
+						},
+						new FontImageSource
+						{
+							Glyph = '\uf100'.ToString(),
+							FontFamily = fontFamily,
+							Color = Color.Red,
+							Size = 20
+						},
+					},
+				},
+				BackgroundColor = Color.Black,
+				VerticalOptions = LayoutOptions.Center,
+				HorizontalOptions = LayoutOptions.Center,
+			}, i % 10, i / 10);
+
 			Content = new ScrollView
 			{
 				VerticalOptions = LayoutOptions.FillAndExpand,
