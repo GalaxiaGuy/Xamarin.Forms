@@ -250,6 +250,8 @@ namespace Xamarin.Forms.Platform.iOS
 		//should this be the default color on the BP for iOS? 
 		readonly Color _defaultColor = Color.White;
 
+		static readonly double _defaultFontSize = 30;
+
 		[Preserve(Conditional = true)]
 		public FontImageSourceHandler()
 		{
@@ -264,27 +266,29 @@ namespace Xamarin.Forms.Platform.iOS
 		}
 
 		public Task<UIImage> LoadImageAsync(
-			ImageSource imagesource,
+			ImageSource imageSource,
 			CancellationToken cancelationToken = default(CancellationToken),
 			float scale = 1f)
 		{
-			UIImage image = null;
+			UIImage image;
+			float baseSize = 0;
 			var layerPropertiesList = new List<LayerProperties>();
-			CGSize maxImageSize = CGSize.Empty;
-			bool renderingModeAlwaysOriginal = false;
+			var maxImageSize = CGSize.Empty;
+			var renderingModeAlwaysOriginal = false;
 
-			if (imagesource is LayeredFontImageSource layeredFontImageSource)
+			if (imageSource is LayeredFontImageSource layeredFontImageSource)
 			{
-				var baseFont = UIFont.FromName(layeredFontImageSource.FontFamily ?? string.Empty, (float)layeredFontImageSource.Size) ??
-					UIFont.SystemFontOfSize((float)layeredFontImageSource.Size);
+				baseSize = (float)layeredFontImageSource.Size;
+				var baseFont = UIFont.FromName(layeredFontImageSource.FontFamily ?? string.Empty, baseSize) ?? UIFont.SystemFontOfSize(baseSize);
 				var baseIconColor = layeredFontImageSource.Color.IsDefault ? _defaultColor : layeredFontImageSource.Color;
 				var baseAttString = layeredFontImageSource.Glyph == null ? null : new NSAttributedString(layeredFontImageSource.Glyph, font: baseFont, foregroundColor: baseIconColor.ToUIColor());
 				maxImageSize = layeredFontImageSource.Glyph == null ? CGSize.Empty : ((NSString)layeredFontImageSource.Glyph).GetSizeUsingAttributes(baseAttString.GetUIKitAttributes(0, out _));
 
 				foreach (var layer in layeredFontImageSource.Layers)
 				{
-					var font = layer.FontFamily == null ? baseFont : UIFont.FromName(layer.FontFamily ?? string.Empty, (float)layer.Size) ??
-						UIFont.SystemFontOfSize((float)layer.Size);
+					var size = layer.Size == _defaultFontSize ? baseSize : (float)layer.Size;
+					var font = layer.FontFamily == null ? baseFont : UIFont.FromName(layer.FontFamily ?? string.Empty, size) ??
+						UIFont.SystemFontOfSize(size);
 					var iconcolor = layer.Color.IsDefault ? baseIconColor : layer.Color;
 					var attString = layer.Glyph == null ? baseAttString : new NSAttributedString(layer.Glyph, font: font, foregroundColor: iconcolor.ToUIColor());
 					var imagesize = ((NSString)layer.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
@@ -304,17 +308,17 @@ namespace Xamarin.Forms.Platform.iOS
 
 				renderingModeAlwaysOriginal = baseIconColor != _defaultColor;
 			}
-			else if (imagesource is FontImageSource fontsource)
+			else if (imageSource is FontImageSource fontSource)
 			{
-				var font = UIFont.FromName(fontsource.FontFamily ?? string.Empty, (float)fontsource.Size) ??
-					UIFont.SystemFontOfSize((float)fontsource.Size);
-				var iconcolor = fontsource.Color.IsDefault ? _defaultColor : fontsource.Color;
-				var attString = new NSAttributedString(fontsource.Glyph, font: font, foregroundColor: iconcolor.ToUIColor());
-				var imagesize = ((NSString)fontsource.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
+				var size = (float)fontSource.Size;
+				var font = UIFont.FromName(fontSource.FontFamily ?? string.Empty, size) ?? UIFont.SystemFontOfSize(size);
+				var iconColor = fontSource.Color.IsDefault ? _defaultColor : fontSource.Color;
+				var attString = new NSAttributedString(fontSource.Glyph, font: font, foregroundColor: iconColor.ToUIColor());
+				var imageSize = ((NSString)fontSource.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
 
-				layerPropertiesList.Add(new LayerProperties { Font = font, IconColor = iconcolor, AttString = attString, ImageSize = imagesize });
+				layerPropertiesList.Add(new LayerProperties { Font = font, IconColor = iconColor, AttString = attString, ImageSize = imageSize });
 
-				maxImageSize = imagesize;
+				maxImageSize = imageSize;
 			}
 
 			UIGraphics.BeginImageContextWithOptions(maxImageSize, false, 0f);
@@ -323,18 +327,18 @@ namespace Xamarin.Forms.Platform.iOS
 			foreach (var layerProperties in layerPropertiesList)
 			{
 				var font = layerProperties.Font;
-				var iconcolor = layerProperties.IconColor;
+				var iconColor = layerProperties.IconColor;
 				var attString = layerProperties.AttString;
-				var imagesize = layerProperties.ImageSize;
+				var imageSize = layerProperties.ImageSize;
 
-				var boundingRect = attString.GetBoundingRect(imagesize, (NSStringDrawingOptions)0, ctx);
+				var boundingRect = attString.GetBoundingRect(imageSize, (NSStringDrawingOptions)0, ctx);
 				attString.DrawString(new RectangleF(
 					maxImageSize.Width / 2 - boundingRect.Size.Width / 2,
 					maxImageSize.Height / 2 - boundingRect.Size.Height / 2,
 					maxImageSize.Width,
 					maxImageSize.Height));
 
-				renderingModeAlwaysOriginal |= iconcolor != _defaultColor;
+				renderingModeAlwaysOriginal |= iconColor != _defaultColor;
 			}
 			image = UIGraphics.GetImageFromCurrentImageContext();
 			UIGraphics.EndImageContext();

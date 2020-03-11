@@ -47,22 +47,6 @@ namespace Xamarin.Forms.Controls
 			});
 
 			var i = 1;
-			foreach (char c in Ionicons)
-			{
-				grid.Children.Add(new Image
-				{
-					Source = new FontImageSource
-					{
-						Glyph = c.ToString(),
-						FontFamily = fontFamily,
-						Size = 20
-					},
-					BackgroundColor = Color.Black,
-					VerticalOptions = LayoutOptions.Center,
-					HorizontalOptions = LayoutOptions.Center,
-				}, i % 10, i / 10);
-				i++;
-			}
 
 			grid.Children.Add(new Image
 			{
@@ -79,7 +63,7 @@ namespace Xamarin.Forms.Controls
 						{
 							Glyph = '\uf100'.ToString(),
 							FontFamily = fontFamily,
-							Color = Color.Red,
+							Color = Color.Yellow,
 							Size = 20
 						},
 					},
@@ -88,6 +72,74 @@ namespace Xamarin.Forms.Controls
 				VerticalOptions = LayoutOptions.Center,
 				HorizontalOptions = LayoutOptions.Center,
 			}, i % 10, i / 10);
+			i++;
+
+			grid.Children.Add(new Image
+			{
+				Source = new LayeredFontImageSource
+				{
+					FontFamily = fontFamily,
+					Size = 20,
+					Layers = new List<FontImageSource> {
+						new FontImageSource
+						{
+							Glyph = '\uf23e'.ToString(),
+							Color = Color.White,
+						},
+						new FontImageSource
+						{
+							Glyph = '\uf23f'.ToString(),
+							Color = Color.CornflowerBlue,
+						},
+					},
+				},
+				BackgroundColor = Color.Black,
+				VerticalOptions = LayoutOptions.Center,
+				HorizontalOptions = LayoutOptions.Center,
+			}, i % 10, i / 10);
+			i++;
+
+			grid.Children.Add(new Image
+			{
+				Source = new LayeredFontImageSource
+				{
+					FontFamily = fontFamily,
+					Size = 20,
+					Layers = new List<FontImageSource> {
+						new FontImageSource
+						{
+							Glyph = '\uf24c'.ToString(),
+							Color = Color.White,
+						},
+						new FontImageSource
+						{
+							Glyph = '\uf24d'.ToString(),
+							Color = Color.Red,
+						},
+					},
+				},
+				BackgroundColor = Color.Black,
+				VerticalOptions = LayoutOptions.Center,
+				HorizontalOptions = LayoutOptions.Center,
+			}, i % 10, i / 10);
+			i++;
+
+			foreach (char c in Ionicons)
+			{
+				grid.Children.Add(new Image
+				{
+					Source = new FontImageSource
+					{
+						Glyph = c.ToString(),
+						FontFamily = fontFamily,
+						Size = 20
+					},
+					BackgroundColor = Color.Black,
+					VerticalOptions = LayoutOptions.Center,
+					HorizontalOptions = LayoutOptions.Center,
+				}, i % 10, i / 10);
+				i++;
+			}
 
 			Content = new ScrollView
 			{

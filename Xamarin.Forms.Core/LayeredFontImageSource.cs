@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Xamarin.Forms
 {
+	[ContentProperty(nameof(Layers))]
     public class LayeredFontImageSource : ImageSource
     {
         public override bool IsEmpty => Layers == null || Layers.Count == 0 || Layers.All(x => x.IsEmpty);
@@ -54,7 +55,7 @@ namespace Xamarin.Forms
             set => SetValue(SizeProperty, value);
         }
 
-        private void OnLayersChanged(IList<FontImageSource> oldLayers, IList<FontImageSource> newLayers)
+        void OnLayersChanged(IList<FontImageSource> oldLayers, IList<FontImageSource> newLayers)
         {
             if (oldLayers != null)
             {
@@ -73,7 +74,7 @@ namespace Xamarin.Forms
             OnSourceChanged();
         }
 
-        private void LayerSourceChanged(object sender, EventArgs e)
+        void LayerSourceChanged(object sender, EventArgs e)
         {
             OnSourceChanged();
         }
