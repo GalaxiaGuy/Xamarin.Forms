@@ -78,6 +78,60 @@ namespace Xamarin.Forms.Controls
 			{
 				Source = new LayeredFontImageSource
 				{
+					Size = 30,
+					Layers = new List<FontImageSource> {
+						new FontImageSource
+						{
+							Glyph = '\uf2d1'.ToString(),
+							FontFamily = fontFamily,
+							Size = 20
+						},
+						new FontImageSource
+						{
+							Glyph = '\uf100'.ToString(),
+							FontFamily = fontFamily,
+							Color = Color.Yellow,
+							Size = 20
+						},
+					},
+				},
+				BackgroundColor = Color.Black,
+				VerticalOptions = LayoutOptions.Center,
+				HorizontalOptions = LayoutOptions.Center,
+			}, i % 10, i / 10);
+			i++;
+
+			grid.Children.Add(new Image
+			{
+				Source = new LayeredFontImageSource
+				{
+					Size = 20,
+					Layers = new List<FontImageSource> {
+						new FontImageSource
+						{
+							Glyph = '\uf2d1'.ToString(),
+							FontFamily = fontFamily,
+							Size = 30
+						},
+						new FontImageSource
+						{
+							Glyph = '\uf100'.ToString(),
+							FontFamily = fontFamily,
+							Color = Color.Yellow,
+							Size = 30
+						},
+					},
+				},
+				BackgroundColor = Color.Black,
+				VerticalOptions = LayoutOptions.Center,
+				HorizontalOptions = LayoutOptions.Center,
+			}, i % 10, i / 10);
+			i++;
+
+			grid.Children.Add(new Image
+			{
+				Source = new LayeredFontImageSource
+				{
 					FontFamily = fontFamily,
 					Size = 20,
 					Layers = new List<FontImageSource> {

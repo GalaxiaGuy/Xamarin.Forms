@@ -250,8 +250,6 @@ namespace Xamarin.Forms.Platform.iOS
 		//should this be the default color on the BP for iOS? 
 		readonly Color _defaultColor = Color.White;
 
-		static readonly double _defaultFontSize = 30;
-
 		[Preserve(Conditional = true)]
 		public FontImageSourceHandler()
 		{
@@ -271,14 +269,13 @@ namespace Xamarin.Forms.Platform.iOS
 			float scale = 1f)
 		{
 			UIImage image;
-			float baseSize = 0;
 			var layerPropertiesList = new List<LayerProperties>();
 			var maxImageSize = CGSize.Empty;
 			var renderingModeAlwaysOriginal = false;
 
 			if (imageSource is LayeredFontImageSource layeredFontImageSource)
 			{
-				baseSize = (float)layeredFontImageSource.Size;
+				var baseSize = (float)layeredFontImageSource.Size;
 				var baseFont = UIFont.FromName(layeredFontImageSource.FontFamily ?? string.Empty, baseSize) ?? UIFont.SystemFontOfSize(baseSize);
 				var baseIconColor = layeredFontImageSource.Color.IsDefault ? _defaultColor : layeredFontImageSource.Color;
 				var baseAttString = layeredFontImageSource.Glyph == null ? null : new NSAttributedString(layeredFontImageSource.Glyph, font: baseFont, foregroundColor: baseIconColor.ToUIColor());
@@ -286,7 +283,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 				foreach (var layer in layeredFontImageSource.Layers)
 				{
-					var size = layer.Size == _defaultFontSize ? baseSize : (float)layer.Size;
+					var size = layer.IsSet(LayeredFontImageSource.SizeProperty) ? (float)layer.Size : baseSize;
 					var font = layer.FontFamily == null ? baseFont : UIFont.FromName(layer.FontFamily ?? string.Empty, size) ??
 						UIFont.SystemFontOfSize(size);
 					var iconcolor = layer.Color.IsDefault ? baseIconColor : layer.Color;
