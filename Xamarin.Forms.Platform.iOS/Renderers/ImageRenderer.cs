@@ -257,7 +257,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private class LayerProperties
 		{
-			public UIFont Font { get; set; }
 			public Color IconColor { get; set; }
 			public NSAttributedString AttString { get; set; }
 			public CGSize ImageSize { get; set; }
@@ -290,7 +289,7 @@ namespace Xamarin.Forms.Platform.iOS
 					var attString = layer.Glyph == null ? baseAttString : new NSAttributedString(layer.Glyph, font: font, foregroundColor: iconcolor.ToUIColor());
 					var imagesize = ((NSString)layer.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
 
-					layerPropertiesList.Add(new LayerProperties { Font = font, IconColor = iconcolor, AttString = attString, ImageSize = imagesize });
+					layerPropertiesList.Add(new LayerProperties { IconColor = iconcolor, AttString = attString, ImageSize = imagesize });
 
 					if (imagesize.Width > maxImageSize.Width)
 					{
@@ -313,7 +312,7 @@ namespace Xamarin.Forms.Platform.iOS
 				var attString = new NSAttributedString(fontSource.Glyph, font: font, foregroundColor: iconColor.ToUIColor());
 				var imageSize = ((NSString)fontSource.Glyph).GetSizeUsingAttributes(attString.GetUIKitAttributes(0, out _));
 
-				layerPropertiesList.Add(new LayerProperties { Font = font, IconColor = iconColor, AttString = attString, ImageSize = imageSize });
+				layerPropertiesList.Add(new LayerProperties { IconColor = iconColor, AttString = attString, ImageSize = imageSize });
 
 				maxImageSize = imageSize;
 			}
@@ -323,7 +322,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 			foreach (var layerProperties in layerPropertiesList)
 			{
-				var font = layerProperties.Font;
 				var iconColor = layerProperties.IconColor;
 				var attString = layerProperties.AttString;
 				var imageSize = layerProperties.ImageSize;
