@@ -282,7 +282,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 				foreach (var layer in layeredFontImageSource.Layers)
 				{
-					var size = layer.IsSet(LayeredFontImageSource.SizeProperty) ? (float)layer.Size : baseSize;
+					var size = layer.IsSet(FontImageSource.SizeProperty) ? (float)layer.Size : baseSize;
 					var font = layer.FontFamily == null ? baseFont : UIFont.FromName(layer.FontFamily ?? string.Empty, size) ??
 						UIFont.SystemFontOfSize(size);
 					var iconcolor = layer.Color.IsDefault ? baseIconColor : layer.Color;
